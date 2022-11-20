@@ -15,7 +15,7 @@ parser.add_argument('--leaguename', type=str, required=True)
 parser.add_argument('--now', type=bool, required=False, default=False)
 args = parser.parse_args()
 
-oauth = OAuth2(None, None, from_file='/mnt/g/code/yahoo-fantasy/creds.json')
+oauth = OAuth2(None, None, from_file='creds.json')
 
 # Grabs the league ID numbers that I have hardcoded below.
 # TODO: Capture the leagueId variable dynamically
