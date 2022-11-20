@@ -64,18 +64,18 @@ def main():
 # Take current datetime, add a day, change the time to 1AM by converting it to a string
 # and then back to a datetime 
 # TODO: Change to 00:01 Pacific Time to follow global Yahoo waiver time
-    if not args.now:
+    # if not args.now:
         
-        print(time.daylig)
-        waiver_time = datetime.datetime.now()
-        waiver_time += datetime.timedelta(days=1)
-        waiver_time = waiver_time.strftime('%y-%m-%d') + ' 00-01-15 UTC'
-        waiver_time = datetime.datetime.strptime(waiver_time, '%y-%m-%d %H-%M-%S %Z')
+    #     print(time.daylig)
+    #     waiver_time = datetime.datetime.now()
+    #     waiver_time += datetime.timedelta(days=1)
+    #     waiver_time = waiver_time.strftime('%y-%m-%d') + ' 00-01-15 UTC'
+    #     waiver_time = datetime.datetime.strptime(waiver_time, '%y-%m-%d %H-%M-%S %Z')
     
-        pause.until(waiver_time)
-        print(waiver_time)
+    #     pause.until(waiver_time)
+    #     print(waiver_time)
 
-        add_drop(leagueId, teamId, playerIdAdded, playerIdDropped)
+    add_drop(leagueId, teamId, playerIdAdded, playerIdDropped)
 
 def player_lookup(name, league):
     try:
