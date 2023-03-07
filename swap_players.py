@@ -1,42 +1,33 @@
 from yahoo_oauth import OAuth2
 import json
-import pause
-import time, datetime
-from datetime import date
-import pytz
 import argparse
 import re
 import yahoo_fantasy_api as yfa
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--addname', type=str, required=True)
-parser.add_argument('--dropname', type=str, required=True)
+parser.add_argument('--addname', type=str, required=False, default='')
+parser.add_argument('--dropname', type=str, required=False, default='')
 parser.add_argument('--leaguename', type=str, required=True)
-parser.add_argument('--now', type=bool, required=False, default=False)
 args = parser.parse_args()
 
 oauth = OAuth2(None, None, from_file='creds.json')
 
-# Grabs the league ID numbers that I have hardcoded below.
-# TODO: Capture the leagueId variable dynamically
+# Snippet below grabs the league ID numbers that I have hardcoded in main.
+# TODO: Capture the leagueId variable programmatically
 
 # game = yfa.game.Game(oauth, 'nhl')
 # leagueIds = game.league_ids(year=2022)
 # print(leagueIds)
 
-
-# Grab a list of the teams in a league and details. This will show the team ID numbers I
-#  have hardcoded below.
-# TODO: Capture the teamId variable dynamically
+# Snippet below grabs list of the teams in a league and details. This will show the team ID numbers I harcoded in main.
+# TODO: Capture the teamId variable programmatically
 
 # league = yfa.League(oauth, b2LeagueId)
 # leagueTeams = league.teams()
-# print(leagueTeams)
-
-
-
+# print(leagueTeams)3
 
 def main():
+    # Define the league info that I've manually grabbed from the yfa_init_oatuh_env.py script.
     if args.leaguename == 'dickfoy':
         leagueId = '419.l.23876'
         teamId = '11'
@@ -47,35 +38,41 @@ def main():
         print('League name not recognized')
         exit(1)
 
-    playerAdded = player_lookup(args.addname, leagueId)
-    playerDropped = player_lookup(args.dropname, leagueId)
+    # Figure out if were adding, dropping, or swapping a player
 
-    playerIdAdded = playerAdded[0]
-    playerIdDropped = playerDropped[0]
+    if (args.addname == '') and (args.dropname == ''):
+        print('You need to specify a player to add, drop, or both.')
+        exit(1)
+    elif (args.addname ==''):
+        action = "drop"
+    elif (args.dropname ==''):
+        action = "add"
+    else:
+        action = "swap"
 
-    playerNameAdded = playerAdded[1]
-    playerNameDropped = playerDropped[1]
+    # Turn the user input into a format readable by the API and print the attempted action
 
-    print(args.now)
+    if (action == 'swap') or (action == 'add'):
+        playerAdded = player_lookup(args.addname, leagueId)
+        playerIdAdded = playerAdded[0]
+        playerNameAdded = playerAdded[1]
+        print("Attempting to add", playerNameAdded)
 
-    print("Attempting to add", playerNameAdded, "| Attempting to drop", playerNameDropped)
+    if (action == 'swap') or (action == 'drop'):
+        playerDropped = player_lookup(args.dropname, leagueId)
+        playerIdDropped = playerDropped[0]
+        playerNameDropped = playerDropped[1]
+        print("Attempting to drop", playerNameDropped)
 
-# The default action is to wait until 1AM localtime.
-# Take current datetime, add a day, change the time to 1AM by converting it to a string
-# and then back to a datetime 
-# TODO: Change to 00:01 Pacific Time to follow global Yahoo waiver time
-    # if not args.now:
-        
-    #     print(time.daylig)
-    #     waiver_time = datetime.datetime.now()
-    #     waiver_time += datetime.timedelta(days=1)
-    #     waiver_time = waiver_time.strftime('%y-%m-%d') + ' 00-01-15 UTC'
-    #     waiver_time = datetime.datetime.strptime(waiver_time, '%y-%m-%d %H-%M-%S %Z')
+    # Execute the action
     
-    #     pause.until(waiver_time)
-    #     print(waiver_time)
+    if action == "swap":
+        add_drop(leagueId, teamId, playerIdAdded, playerIdDropped)
+    elif action == "add":
+        add(leagueId, teamId, playerIdAdded)
+    elif action == "drop":
+        drop(leagueId, teamId, playerIdDropped)
 
-    add_drop(leagueId, teamId, playerIdAdded, playerIdDropped)
 
 def player_lookup(name, league):
     try:
@@ -109,6 +106,22 @@ def player_lookup(name, league):
 def add_drop(league, team, playerAdded, playerDropped):
     try:
         yfa.Team(oauth, league+'.t.'+team).add_and_drop_players(playerAdded, playerDropped)
+    except RuntimeError as err:
+        err = str(err)
+        err = re.search('<description>(.*)</description>', err)
+        print(err.group(1))
+
+def add(league, team, playerAdded):
+    try:
+        yfa.Team(oauth, league+'.t.'+team).add_player(playerAdded)
+    except RuntimeError as err:
+        err = str(err)
+        err = re.search('<description>(.*)</description>', err)
+        print(err.group(1))
+
+def drop(league, team, playerDropped):
+    try:
+        yfa.Team(oauth, league+'.t.'+team).drop_player(playerDropped)
     except RuntimeError as err:
         err = str(err)
         err = re.search('<description>(.*)</description>', err)
