@@ -7,7 +7,7 @@ import yahoo_fantasy_api as yfa
 parser = argparse.ArgumentParser()
 parser.add_argument('--addname', type=str, required=False, default='')
 parser.add_argument('--dropname', type=str, required=False, default='')
-parser.add_argument('--leaguename', type=str, required=True)
+parser.add_argument('--leaguename', type=str, required=False)
 args = parser.parse_args()
 
 oauth = OAuth2(None, None, from_file='creds.json')
@@ -27,12 +27,14 @@ oauth = OAuth2(None, None, from_file='creds.json')
 # print(leagueTeams)3
 
 def main():
+
+    game = yfa.game.Game(oauth, 'nhl')
+    leagueIds = game.league_ids(year=2023)
+    print(leagueIds)
+
     # Define the league info that I've manually grabbed from the yfa_init_oatuh_env.py script.
     if args.leaguename == 'dickfoy':
-        leagueId = '419.l.23876'
-        teamId = '11'
-    elif args.leaguename == 'b2':
-        leagueId = '419.l.36232'
+        leagueId = '427.l.43087'
         teamId = '10'
     else:
         print('League name not recognized')
